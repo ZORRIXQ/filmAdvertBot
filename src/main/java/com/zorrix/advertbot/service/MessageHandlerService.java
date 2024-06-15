@@ -7,6 +7,8 @@ import com.zorrix.advertbot.commands.StartCommand;
 import com.zorrix.advertbot.config.ChannelsConfig;
 import com.zorrix.advertbot.exceptions.WrongCommandException;
 import com.zorrix.advertbot.exceptions.WrongMessageException;
+import lombok.AccessLevel;
+import lombok.experimental.FieldDefaults;
 import org.jvnet.hk2.annotations.Service;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -20,7 +22,9 @@ import java.util.Map;
 
 @Service
 @Component
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class MessageHandlerService {
+    //Loading all the variables we need
     private final CheckSubscriptionCommand checkSubscriptionCommand;
     private final ChannelsConfig channelsConfig;
     ExecutorService executor;
@@ -47,42 +51,47 @@ public class MessageHandlerService {
     }
 
     public void handleMessage(Message message, @Autowired AdvertBot bot) throws TelegramApiException {
+
+        String text = message.getText().trim();
+        long chatId = message.getChatId();
+
+        if (!text.startsWith("/")) {
+            handleCommand(message, chatId, bot);
+        } else {
+            handleNonCommand(message, chatId, bot);
+        }
+    }
+
+    private void handleCommand(Message message, long chatId,@Autowired AdvertBot bot) throws TelegramApiException {
         SendMessage sendMessage = new SendMessage();
-        StringBuilder textToSend = new StringBuilder();
+        Map<String, String> channels = checkSubscriptionCommand.isUserSubscribedToAllChannels(message.getFrom().getId(), channelsConfig.getChannels(), bot);
 
-        if (message.hasText()) {
-            String text = message.getText().trim();
-            long chatId = message.getChatId();
-
-            sendMessage.setChatId(chatId);
-
-            if (!text.startsWith("/")) {
-                Map<String, String> channels = checkSubscriptionCommand.isUserSubscribedToAllChannels(message.getFrom().getId(), channelsConfig.getChannels(), bot);
-
-                if (!channels.isEmpty()){
-                    executor.executeSubscribeLabel(chatId, message.getFrom().getId(), bot, channels);
-                    return;
-                }
-                else
-                    sendMessage.setText("In progress");
-            } else {
-                if (text.equals(startCommand.getCommand())){
-                    textToSend.append(startCommand.getResponse());
-                } else if (text.equals(helpCommand.getCommand())){
-                    textToSend.append(helpCommand.getResponse());
-                }
-
-                //more commands
-
-                else{
-                    textToSend.append(wrongCommand.getResponse());
-                }
-                if (textToSend.isEmpty()) {
-                    textToSend.append("Unhandled exception has been occurred");
-                }
-                sendMessage.setText(textToSend.toString());
-            }
+        if (!channels.isEmpty()){
+            executor.executeSubscribeLabel(chatId, message.getFrom().getId(), bot, channels);
+        } else {
+            sendMessage.setText("In progress");
             executor.executeSendMessage(sendMessage, bot);
         }
     }
+
+    private void handleNonCommand(Message message, long chatId, @Autowired AdvertBot bot) throws TelegramApiException {
+        String text = message.getText().trim();
+        StringBuilder textToSend = new StringBuilder();
+        SendMessage sendMessage = new SendMessage();
+
+        if (text.equals(startCommand.getCommand())){
+            textToSend.append(startCommand.getResponse());
+        } else if (text.equals(helpCommand.getCommand())){
+            textToSend.append(helpCommand.getResponse());
+        }
+        //Another commands
+
+        else{
+            textToSend.append(wrongMessage.getResponse());
+        }
+        sendMessage.setText(textToSend.toString());
+        sendMessage.setChatId(chatId);
+        executor.executeSendMessage(sendMessage, bot);
+    }
+
 }

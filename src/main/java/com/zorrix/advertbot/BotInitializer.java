@@ -13,18 +13,22 @@ public class BotInitializer {
 
     @Autowired
     public BotInitializer(AdvertBot bot) {
+        //Autowiring singleton bot instance in the BitInitializer bean
         this.bot = bot;
     }
 
+    //register bot with initializer obj
     public void initBot() throws TelegramApiException {
         TelegramBotsApi botsApi = new TelegramBotsApi(DefaultBotSession.class);
         try {
+
             botsApi.registerBot(bot);
         } catch (TelegramApiException e) {
             e.printStackTrace();
         }
     }
 
+    //register bot without initializer obj
     public static void initBot(@Autowired AdvertBot bot) throws TelegramApiException {
         System.out.println("___________________\nINIT BOT\n----------------------");
         TelegramBotsApi botsApi = new TelegramBotsApi(DefaultBotSession.class);

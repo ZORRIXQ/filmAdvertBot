@@ -34,21 +34,12 @@ public class AdvertBot extends TelegramLongPollingBot {
     public void onUpdateReceived(Update update) {
         if (update.hasMessage() && update.getMessage().hasText()) {
             SendMessage messageToSend = messageHandler.handleMessage(update.getMessage());
+
             try {
                 executorService.executeSendMessage(messageToSend, this);
             } catch (TelegramApiException e) {
                 throw new RuntimeException(e);
             }
-
-//            Message message = update.getMessage();
-//            String text = message.getText();
-//            long chatId = message.getChatId();
-//            try {
-//                executorService.executeText(text, chatId, this);
-//            } catch (TelegramApiException e) {
-//                throw new RuntimeException(e);
-//            }
-
         }
     }
 

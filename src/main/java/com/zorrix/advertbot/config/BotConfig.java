@@ -8,6 +8,8 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
+
 @Configuration
 @ComponentScan("com.zorrix.advertbot")
 @Getter
@@ -26,4 +28,6 @@ public class BotConfig {
 
     @Value("${bot.api-url}")
     String botApiUrl;
+
+
 }

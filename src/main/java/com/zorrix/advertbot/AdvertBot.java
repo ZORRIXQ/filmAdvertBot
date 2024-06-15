@@ -33,10 +33,8 @@ public class AdvertBot extends TelegramLongPollingBot {
     @Override
     public void onUpdateReceived(Update update) {
         if (update.hasMessage() && update.getMessage().hasText()) {
-            SendMessage messageToSend = messageHandler.handleMessage(update.getMessage());
-
             try {
-                executorService.executeSendMessage(messageToSend, this);
+                messageHandler.handleMessage(update.getMessage(), this);
             } catch (TelegramApiException e) {
                 throw new RuntimeException(e);
             }

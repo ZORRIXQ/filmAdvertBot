@@ -28,11 +28,8 @@ public class MessageHandlerService {
     StartCommand startCommand;
     HelpCommand helpCommand;
 
-
     WrongCommandException wrongCommand;
     WrongMessageException wrongMessage;
-
-
 
     @Autowired
     MessageHandlerService(StartCommand startCommand,
@@ -60,8 +57,10 @@ public class MessageHandlerService {
             sendMessage.setChatId(chatId);
 
             if (!text.startsWith("/")) {
-                if (!checkSubscriptionCommand.isUserSubscribedToAllChannels(message.getFrom().getId(), channelsConfig.getChannels(), bot)){
-                    executor.executeSubscribeLabel(chatId, message.getFrom().getId(), bot);
+                Map<String, String> channels = checkSubscriptionCommand.isUserSubscribedToAllChannels(message.getFrom().getId(), channelsConfig.getChannels(), bot);
+
+                if (!channels.isEmpty()){
+                    executor.executeSubscribeLabel(chatId, message.getFrom().getId(), bot, channels);
                     return;
                 }
                 else

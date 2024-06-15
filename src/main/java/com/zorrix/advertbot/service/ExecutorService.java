@@ -52,29 +52,26 @@ public class ExecutorService {
         bot.execute(sendMessage);
     }
 
-    public void executeSubscribeLabel(long chatId, long userId, @Autowired AdvertBot bot) throws TelegramApiException {
+    public void executeSubscribeLabel(long chatId, long userId, @Autowired AdvertBot bot, Map<String, String> channels) throws TelegramApiException {
         SendMessage sendMessage = new SendMessage();
         sendMessage.setChatId(chatId);
         sendMessage.setText(subscribeMessage);
 
-        InlineKeyboardMarkup inlineKeyboardMarkup = getInlineKeyboardMarkup(userId, bot);
+        InlineKeyboardMarkup inlineKeyboardMarkup = getInlineKeyboardMarkup(userId, bot, channels);
 
         sendMessage.setReplyMarkup(inlineKeyboardMarkup);
 
         bot.execute(sendMessage);
     }
 
-    private InlineKeyboardMarkup getInlineKeyboardMarkup(long userId, @Autowired AdvertBot bot) throws TelegramApiException {
+    private InlineKeyboardMarkup getInlineKeyboardMarkup(long userId, @Autowired AdvertBot bot, Map<String, String> channels) throws TelegramApiException {
         InlineKeyboardMarkup inlineKeyboardMarkup = new InlineKeyboardMarkup();
-
-        Map<String, String> channels = channelsConfig.getChannels();
 
         List<List<InlineKeyboardButton>> rows = new ArrayList<>();
 
         int i = 0;
         System.out.println("channels size: " + channels.size());
         for (Map.Entry<String, String> channel : channels.entrySet()) {
-            if (!checkSubscriptionCommand.isUserSubscribed(userId, channel.getKey(), bot)){
                 List<InlineKeyboardButton> row = new ArrayList<>();
 
                 InlineKeyboardButton subscribeButton1 = new InlineKeyboardButton();
@@ -85,7 +82,6 @@ public class ExecutorService {
                 rows.add(row);
 
                 i++;
-            }
         }
 
         List<InlineKeyboardButton> row = new ArrayList<>();

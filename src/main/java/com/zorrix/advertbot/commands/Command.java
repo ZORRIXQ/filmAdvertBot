@@ -6,5 +6,5 @@ import org.springframework.stereotype.Component;
 
 public interface Command {
     public String getCommand();
-
+    public String getResponse();
 }

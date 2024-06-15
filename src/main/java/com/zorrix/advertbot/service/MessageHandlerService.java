@@ -1,6 +1,7 @@
 package com.zorrix.advertbot.service;
 
 import com.zorrix.advertbot.commands.StartCommand;
+import com.zorrix.advertbot.exceptions.WrongCommandMessage;
 import org.jvnet.hk2.annotations.Service;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -10,13 +11,14 @@ import org.telegram.telegrambots.meta.api.objects.Message;
 @Service
 @Component
 public class MessageHandlerService {
-//    Commands commands;
     StartCommand startCommand;
+    WrongCommandMessage wrongCommand;
+
 
     @Autowired
-    MessageHandlerService(StartCommand startCommand){
+    MessageHandlerService(StartCommand startCommand, WrongCommandMessage wrongCommand){
         this.startCommand = startCommand;
-//        this.commands = commands;
+        this.wrongCommand = wrongCommand;
     }
 
     public SendMessage handleMessage(Message message) {
@@ -31,6 +33,8 @@ public class MessageHandlerService {
                 if (text.equals(startCommand.getCommand())){
                     sendMessage.setText("Hello, user!");
                 }
+                else
+                    sendMessage.setText(wrongCommand.getResponse());
                 //more commands
             }
 

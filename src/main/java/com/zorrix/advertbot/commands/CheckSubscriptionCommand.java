@@ -25,6 +25,7 @@ public class CheckSubscriptionCommand implements Command{
     @Value("${command.check-subscription-command}" + "   ____")
     String response;
 
+    //Checking if user is subscribed to the channel
     public boolean isUserSubscribed(long userId, String chatId, @Autowired AdvertBot bot) {
         GetChatMember getChatMember = new GetChatMember();
         getChatMember.setChatId(chatId);
@@ -43,6 +44,7 @@ public class CheckSubscriptionCommand implements Command{
         }
     }
 
+    //Checking if user is subscribed to all the channels we need
     public Map<String, String> isUserSubscribedToAllChannels(long userId, Map<String, String> channels, @Autowired AdvertBot bot) {
         Map<String, String> map = new LinkedHashMap<>();
 

@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
+import org.telegram.telegrambots.meta.api.methods.updatingmessages.DeleteMessage;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
@@ -52,19 +53,21 @@ public class ExecutorService {
         bot.execute(sendMessage);
     }
 
-    public void executeSubscribeLabel(long chatId, long userId, @Autowired AdvertBot bot, Map<String, String> channels) throws TelegramApiException {
+    //execute a message in which we will ask the user to subscribe to the desired channels
+    public long executeSubscribeLabel(long chatId, @Autowired AdvertBot bot, Map<String, String> channels, String text) throws TelegramApiException {
         SendMessage sendMessage = new SendMessage();
         sendMessage.setChatId(chatId);
-        sendMessage.setText(subscribeMessage);
+        sendMessage.setText(text);
 
-        InlineKeyboardMarkup inlineKeyboardMarkup = getInlineKeyboardMarkup(userId, bot, channels);
+        InlineKeyboardMarkup inlineKeyboardMarkup = getInlineKeyboardMarkup(channels);
 
         sendMessage.setReplyMarkup(inlineKeyboardMarkup);
 
-        bot.execute(sendMessage);
+        return bot.execute(sendMessage).getMessageId();
     }
 
-    private InlineKeyboardMarkup getInlineKeyboardMarkup(long userId, @Autowired AdvertBot bot, Map<String, String> channels) throws TelegramApiException {
+    //getting InlineKeyboardMarkup (buttons under the text of sendMessage)
+    public InlineKeyboardMarkup getInlineKeyboardMarkup(Map<String, String> channels){
         InlineKeyboardMarkup inlineKeyboardMarkup = new InlineKeyboardMarkup();
 
         List<List<InlineKeyboardButton>> rows = new ArrayList<>();
@@ -87,11 +90,19 @@ public class ExecutorService {
         List<InlineKeyboardButton> row = new ArrayList<>();
         InlineKeyboardButton checkSubscriptionButton = new InlineKeyboardButton();
         checkSubscriptionButton.setText("✅" + "CHECK SUBSCRIPTION" + " ✅");
-        checkSubscriptionButton.setCallbackData("/checkSubscription");
+        checkSubscriptionButton.setCallbackData(checkSubscriptionCommand.getCommand());
         row.add(checkSubscriptionButton);
         rows.add(row);
 
         inlineKeyboardMarkup.setKeyboard(rows);
         return inlineKeyboardMarkup;
+    }
+
+    public void deleteMessage(@Autowired AdvertBot bot, int messageId, long chatId) throws TelegramApiException {
+        DeleteMessage deleteMessage = new DeleteMessage();
+        deleteMessage.setChatId(chatId);
+        deleteMessage.setMessageId(messageId);
+
+        bot.execute(deleteMessage);
     }
 }

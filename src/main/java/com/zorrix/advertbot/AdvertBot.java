@@ -29,10 +29,17 @@ public class AdvertBot extends TelegramLongPollingBot {
 
     @Override
     public void onUpdateReceived(Update update) {
+        //delegating the task to another node MessageHandler
         if (update.hasMessage() && update.getMessage().hasText()) {
             try {
-                //delegating the task to another node MessageHandler
                 messageHandler.handleMessage(update.getMessage(), this);
+            } catch (TelegramApiException e) {
+                throw new RuntimeException(e);
+            }
+        } else if (update.hasCallbackQuery()) {
+            //if user pressed inline buttons that returns callBackQuery
+            try {
+                messageHandler.handleCallBackQuery(update.getCallbackQuery(), this);
             } catch (TelegramApiException e) {
                 throw new RuntimeException(e);
             }
@@ -42,6 +49,11 @@ public class AdvertBot extends TelegramLongPollingBot {
     @Override
     public String getBotUsername() {
         return this.config.getBotName();
+    }
+
+    @Override
+    public String getBotToken() {
+        return this.config.getBotToken();
     }
 
     @Override
